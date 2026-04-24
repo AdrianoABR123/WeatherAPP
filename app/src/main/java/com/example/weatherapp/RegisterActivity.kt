@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,6 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.weatherapp.ui.components.PasswordInput
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,8 +47,8 @@ fun RegisterPage(modifier: Modifier = Modifier){
 
     var nameUser by rememberSaveable { mutableStateOf("") }
     var emailUser by rememberSaveable { mutableStateOf("") }
-    var passwordUser by rememberSaveable { mutableStateOf("") }
-    var passwordConfirm by rememberSaveable { mutableStateOf("") }
+    val passwordUser = rememberTextFieldState()
+    val passwordConfirm = rememberTextFieldState()
     val activity = LocalContext.current as Activity
 
     Column(
@@ -63,29 +66,17 @@ fun RegisterPage(modifier: Modifier = Modifier){
         OutlinedTextField(
             value = nameUser,
             label = { Text(text = "Digite seu Nome de Usuário") },
-            modifier = modifier.fillMaxWidth(0.75f),
+            modifier = modifier.fillMaxWidth(0.9f),
             onValueChange = { nameUser = it }
         )
         OutlinedTextField(
             value = emailUser,
             label = { Text(text = "Digite seu E-mail") },
-            modifier = modifier.fillMaxWidth(0.75f),
+            modifier = modifier.fillMaxWidth(0.9f),
             onValueChange = { emailUser = it }
         )
-        OutlinedTextField(
-            value = passwordUser,
-            label = { Text(text = "Digite uma Senha para sua Conta") },
-            modifier = modifier.fillMaxWidth(0.75f),
-            onValueChange = { passwordUser = it },
-            visualTransformation = PasswordVisualTransformation()
-        )
-        OutlinedTextField(
-            value = passwordConfirm,
-            label = { Text(text = "Digite novamente a Senha") },
-            modifier = modifier.fillMaxWidth(0.75f),
-            onValueChange = { passwordConfirm = it },
-            visualTransformation = PasswordVisualTransformation()
-        )
+        PasswordInput(state = passwordUser, label = "Digite uma Senha")
+        PasswordInput(state = passwordConfirm, label = "Digite a Senha Novamente")
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -100,7 +91,7 @@ fun RegisterPage(modifier: Modifier = Modifier){
 
                     activity.finish()
                 },
-                enabled = (nameUser.isNotEmpty() && emailUser.isNotEmpty() && passwordUser.isNotEmpty()) && (passwordUser == passwordConfirm)
+                enabled = (nameUser.isNotEmpty() && emailUser.isNotEmpty() && passwordUser.text.isNotEmpty()) && (passwordUser.text == passwordConfirm.text)
             ) {
                 Text("Registrar")
             }
@@ -115,7 +106,16 @@ fun RegisterPage(modifier: Modifier = Modifier){
 
 
             Button(
-                onClick = {nameUser = ""; emailUser = ""; passwordUser = ""; passwordConfirm = ""}
+                onClick = {
+                    nameUser = ""
+                    emailUser = ""
+                    passwordUser.edit {
+                        replace(0, length, "")
+                    }
+                    passwordConfirm.edit {
+                        replace(0, length, "")
+                    }
+                }
             )
             {
                 Text("Limpar")

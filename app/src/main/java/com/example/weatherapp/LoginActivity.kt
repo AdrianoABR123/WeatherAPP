@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -28,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import com.example.weatherapp.ui.components.PasswordInput
 
 /*
 *   Author: Adriano Eloy Justino da Silva
@@ -50,7 +53,7 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun LoginPage (modifier: Modifier = Modifier){
     var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    val password = rememberTextFieldState()
     val activity = LocalContext.current as Activity
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
@@ -67,16 +70,10 @@ fun LoginPage (modifier: Modifier = Modifier){
         OutlinedTextField(
             value = email,
             label = { Text(text = "Digite seu e-mail") },
-            modifier = modifier.fillMaxWidth(0.75f),
+            modifier = modifier.fillMaxWidth(0.9f),
             onValueChange = { email = it }
         )
-        OutlinedTextField(
-            value = password,
-            label = { Text(text = "Digite sua senha") },
-            modifier = modifier.fillMaxWidth(0.75f),
-            onValueChange = { password = it },
-            visualTransformation = PasswordVisualTransformation()
-        )
+        PasswordInput(state = password, label = "Digite sua Senha")
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 15.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -96,7 +93,7 @@ fun LoginPage (modifier: Modifier = Modifier){
 
                     activity.startActivity(intent)
                 },
-                enabled = email.isNotEmpty() && password.isNotEmpty()
+                enabled = email.isNotEmpty() && password.text.isNotEmpty()
             ) {
                 Text("Login")
             }
@@ -115,7 +112,7 @@ fun LoginPage (modifier: Modifier = Modifier){
             }
 
             Button(
-                onClick = { email = ""; password = "" },
+                onClick = { email = ""; password.edit { replace(0, length, "") }},
 
             ){
                 Text("Limpar")
