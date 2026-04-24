@@ -1,7 +1,6 @@
 package com.example.weatherapp
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,99 +26,101 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-/*
-*   Author: Adriano Eloy Justino da Silva
-*
-*   Matricula: 20242Y6-RC0093
-*
-* */
-
-
-class LoginActivity : ComponentActivity() {
+class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            LoginPage()
+        setContent{
+            RegisterPage()
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginPage (modifier: Modifier = Modifier){
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+fun RegisterPage(modifier: Modifier = Modifier){
+
+    var nameUser by rememberSaveable { mutableStateOf("") }
+    var emailUser by rememberSaveable { mutableStateOf("") }
+    var passwordUser by rememberSaveable { mutableStateOf("") }
+    var passwordConfirm by rememberSaveable { mutableStateOf("") }
     val activity = LocalContext.current as Activity
+
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Bem-vindo/a!",
+            text = "Formulário de Cadastro",
             fontSize = 24.sp
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = email,
-            label = { Text(text = "Digite seu e-mail") },
+            value = nameUser,
+            label = { Text(text = "Digite seu Nome de Usuário") },
             modifier = modifier.fillMaxWidth(0.75f),
-            onValueChange = { email = it }
+            onValueChange = { nameUser = it }
         )
         OutlinedTextField(
-            value = password,
-            label = { Text(text = "Digite sua senha") },
+            value = emailUser,
+            label = { Text(text = "Digite seu E-mail") },
             modifier = modifier.fillMaxWidth(0.75f),
-            onValueChange = { password = it },
+            onValueChange = { emailUser = it }
+        )
+        OutlinedTextField(
+            value = passwordUser,
+            label = { Text(text = "Digite uma Senha para sua Conta") },
+            modifier = modifier.fillMaxWidth(0.75f),
+            onValueChange = { passwordUser = it },
+            visualTransformation = PasswordVisualTransformation()
+        )
+        OutlinedTextField(
+            value = passwordConfirm,
+            label = { Text(text = "Digite novamente a Senha") },
+            modifier = modifier.fillMaxWidth(0.75f),
+            onValueChange = { passwordConfirm = it },
             visualTransformation = PasswordVisualTransformation()
         )
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 15.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ){
             Button(onClick =
                 {
                     Toast.makeText(
                         activity,
-                        "Login Ok!",
+                        "Registrado com Sucesso!",
                         Toast.LENGTH_LONG
                     ).show()
 
-                    val intent = Intent(activity, MainActivity::class.java).apply {
-
-                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    }
-
-                    activity.startActivity(intent)
+                    activity.finish()
                 },
-                enabled = email.isNotEmpty() && password.isNotEmpty()
+                enabled = (nameUser.isNotEmpty() && emailUser.isNotEmpty() && passwordUser.isNotEmpty()) && (passwordUser == passwordConfirm)
             ) {
-                Text("Login")
+                Text("Registrar")
             }
+
             Button(onClick =
                 {
-                    val intent = Intent(activity, RegisterActivity::class.java).apply {
-
-                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    }
-
-                    activity.startActivity(intent)
-                },
-
+                    activity.finish()
+                }
             ) {
-                Text("Cadastrar")
+                Text("Cancelar")
             }
 
-            Button(
-                onClick = { email = ""; password = "" },
 
-            ){
+            Button(
+                onClick = {nameUser = ""; emailUser = ""; passwordUser = ""; passwordConfirm = ""}
+            )
+            {
                 Text("Limpar")
             }
         }
     }
+
 }
