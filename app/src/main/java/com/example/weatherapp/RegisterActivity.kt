@@ -1,9 +1,10 @@
 package com.example.weatherapp
 
-import android.app.Activity
+
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,10 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,12 +23,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.ui.components.PasswordInput
+import com.example.weatherapp.ui.components.inputs.DataInput
+import com.example.weatherapp.ui.components.inputs.PasswordInput
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,9 +44,9 @@ fun RegisterPage(modifier: Modifier = Modifier){
 
     var nameUser by rememberSaveable { mutableStateOf("") }
     var emailUser by rememberSaveable { mutableStateOf("") }
-    val passwordUser = rememberTextFieldState()
-    val passwordConfirm = rememberTextFieldState()
-    val activity = LocalContext.current as Activity
+    var passwordUser by rememberSaveable { mutableStateOf("") }
+    var passwordConfirm by rememberSaveable { mutableStateOf("") }
+    val activity = LocalActivity.current
 
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
@@ -63,20 +60,30 @@ fun RegisterPage(modifier: Modifier = Modifier){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = nameUser,
-            label = { Text(text = "Digite seu Nome de Usuário") },
-            modifier = modifier.fillMaxWidth(0.9f),
-            onValueChange = { nameUser = it }
-        )
-        OutlinedTextField(
-            value = emailUser,
-            label = { Text(text = "Digite seu E-mail") },
-            modifier = modifier.fillMaxWidth(0.9f),
-            onValueChange = { emailUser = it }
-        )
-        PasswordInput(state = passwordUser, label = "Digite uma Senha")
-        PasswordInput(state = passwordConfirm, label = "Digite a Senha Novamente")
+        DataInput(
+            state = nameUser,
+            label = "Digite um nome de usuário",
+            modifier = modifier
+        ) { nameUser = it }
+
+        DataInput(
+            state = emailUser,
+            label = "Digite um e-mail",
+            modifier = modifier
+        ) { emailUser = it }
+
+        PasswordInput(
+            state = passwordUser,
+            label = "Digite uma senha para sua conta",
+            modifier = modifier
+        ) { passwordUser = it }
+
+        PasswordInput(
+            state = passwordConfirm,
+            label = "Digite a senha novamente",
+            modifier = modifier
+        ) { passwordConfirm = it }
+
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -89,16 +96,16 @@ fun RegisterPage(modifier: Modifier = Modifier){
                         Toast.LENGTH_LONG
                     ).show()
 
-                    activity.finish()
+                    activity?.finish()
                 },
-                enabled = (nameUser.isNotEmpty() && emailUser.isNotEmpty() && passwordUser.text.isNotEmpty()) && (passwordUser.text == passwordConfirm.text)
+                enabled = (nameUser.isNotEmpty() && emailUser.isNotEmpty() && passwordUser.isNotEmpty()) && (passwordUser== passwordConfirm)
             ) {
                 Text("Registrar")
             }
 
             Button(onClick =
                 {
-                    activity.finish()
+                    activity?.finish()
                 }
             ) {
                 Text("Cancelar")
@@ -109,12 +116,8 @@ fun RegisterPage(modifier: Modifier = Modifier){
                 onClick = {
                     nameUser = ""
                     emailUser = ""
-                    passwordUser.edit {
-                        replace(0, length, "")
-                    }
-                    passwordConfirm.edit {
-                        replace(0, length, "")
-                    }
+                    passwordUser = ""
+                    passwordConfirm = ""
                 }
             )
             {
