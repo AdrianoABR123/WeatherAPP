@@ -1,4 +1,4 @@
-package com.example.weatherapp.ui.nav
+package com.example.weatherapp.ui.components.nav
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable

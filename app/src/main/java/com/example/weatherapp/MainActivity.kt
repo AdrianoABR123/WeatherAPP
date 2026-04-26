@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,11 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.example.weatherapp.ui.nav.BottomNavBar
-import com.example.weatherapp.ui.nav.BottomNavItem
-import com.example.weatherapp.ui.nav.MainNavHost
-import com.example.weatherapp.ui.pages.HomePage
+import com.example.weatherapp.ui.components.nav.BottomNavBar
+import com.example.weatherapp.ui.components.nav.BottomNavItem
+import com.example.weatherapp.ui.components.nav.MainNavHost
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

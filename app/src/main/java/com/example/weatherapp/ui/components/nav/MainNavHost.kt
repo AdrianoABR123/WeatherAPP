@@ -1,4 +1,4 @@
-package com.example.weatherapp.ui.nav
+package com.example.weatherapp.ui.components.nav
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +24,7 @@ fun MainNavHost(
         composable<Route.List>{
             ListPage(modifier = modifier)
         }
-        composable<Route.List>{
+        composable<Route.Map>{
             MapPage(modifier = modifier)
         }
     }

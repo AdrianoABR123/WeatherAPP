@@ -25,8 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
-import com.example.weatherapp.ui.components.DataInput
-import com.example.weatherapp.ui.components.PasswordInput
+import com.example.weatherapp.ui.components.inputs.DataInput
+import com.example.weatherapp.ui.components.inputs.PasswordInput
 
 /*
 *   Author: Adriano Eloy Justino da Silva

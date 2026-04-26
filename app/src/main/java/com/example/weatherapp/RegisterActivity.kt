@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.weatherapp.ui.components.DataInput
-import com.example.weatherapp.ui.components.PasswordInput
+import com.example.weatherapp.ui.components.inputs.DataInput
+import com.example.weatherapp.ui.components.inputs.PasswordInput
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
