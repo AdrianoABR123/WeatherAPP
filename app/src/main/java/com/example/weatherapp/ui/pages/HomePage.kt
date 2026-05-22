@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HomePage(modifier: Modifier = Modifier){
+fun HomePage(modifier: Modifier = Modifier, viewModel: MainViewModel){
     Column(
         modifier = modifier.fillMaxSize()
             .background(Color.Blue)
