@@ -1,6 +1,7 @@
 package com.example.weatherapp
 
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -27,6 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import com.example.weatherapp.ui.components.inputs.DataInput
 import com.example.weatherapp.ui.components.inputs.PasswordInput
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 /*
 *   Author: Adriano Eloy Justino da Silva
@@ -83,18 +86,14 @@ fun LoginPage (modifier: Modifier = Modifier){
         ){
             Button(onClick =
                 {
-                    Toast.makeText(
-                        activity,
-                        "Login Ok!",
-                        Toast.LENGTH_LONG
-                    ).show()
-
-                    val intent = Intent(activity, MainActivity::class.java).apply {
-
-                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    Firebase.auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Toast.makeText(activity, "Login OK!", Toast.LENGTH_LONG).show()
+                        } else {
+                            Toast.makeText(activity, "Login FALHOU!", Toast.LENGTH_LONG).show()
+                        }
                     }
-
-                    activity?.startActivity(intent)
                 },
                 enabled = email.isNotEmpty()
             ) {

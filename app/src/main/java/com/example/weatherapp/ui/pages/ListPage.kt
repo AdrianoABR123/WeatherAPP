@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.example.weatherapp.model.City
+import com.google.android.gms.maps.model.LatLng
 import kotlin.collections.remove
 
 
@@ -42,8 +43,8 @@ class MainViewModel : ViewModel() {
     fun remove(city: City) {
         _cities.remove(city)
     }
-    fun add(name: String) {
-        _cities.add(City(name = name))
+    fun add(name: String, location: LatLng? = null) {
+        _cities.add(City(name = name, location = location))
     }
 }
 
