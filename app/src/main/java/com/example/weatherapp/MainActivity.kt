@@ -34,6 +34,8 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import com.example.weatherapp.ui.components.nav.Route
 import com.example.weatherapp.ui.pages.MainViewModel
 import com.example.weatherapp.ui.theme.WeatherAPPTheme
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -63,7 +65,9 @@ class MainActivity : ComponentActivity() {
                             title = { Text("Bem-vindo/a!") },
                             actions = {
                                 IconButton(
-                                    onClick = { finish() }
+                                    onClick = {
+                                        Firebase.auth.signOut()
+                                    }
                                 ) {
                                     Icon(
                                         imageVector =
