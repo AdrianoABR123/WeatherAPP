@@ -1,11 +1,12 @@
 package com.example.weatherapp.db.fb
 
+
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
-
 class FBDatabase {
 
     interface Listener {
@@ -58,26 +59,37 @@ class FBDatabase {
         if (auth.currentUser == null)
             throw RuntimeException("User not logged in!")
         val uid = auth.currentUser!!.uid
-        db.collection("users").document(uid + "").set(user);
+        db.collection("users").document(uid).set(user)
+            .addOnFailureListener {
+                Log.e("FBDatabase", "Failed to register user", it)
+            }
     }
 
     fun add(city: FBCity) {
         if (auth.currentUser == null)
             throw RuntimeException("User not logged in!")
-        if (city.name == null || city.name!!.isEmpty())
+        val cityName = city.name?.trim()
+        if (cityName.isNullOrEmpty())
             throw RuntimeException("City with null or empty name!")
         val uid = auth.currentUser!!.uid
         db.collection("users").document(uid).collection("cities")
-            .document(city.name!!).set(city)
+            .document(cityName).set(city)
+            .addOnFailureListener {
+                Log.e("FBDatabase", "Failed to add city '$cityName'", it)
+            }
     }
 
     fun remove(city: FBCity) {
         if (auth.currentUser == null)
             throw RuntimeException("User not logged in!")
-        if (city.name == null || city.name!!.isEmpty())
+        val cityName = city.name?.trim()
+        if (cityName.isNullOrEmpty())
             throw RuntimeException("City with null or empty name!")
         val uid = auth.currentUser!!.uid
         db.collection("users").document(uid).collection("cities")
-            .document(city.name!!).delete()
+            .document(cityName).delete()
+            .addOnFailureListener {
+                Log.e("FBDatabase", "Failed to remove city '$cityName'", it)
+            }
     }
 }

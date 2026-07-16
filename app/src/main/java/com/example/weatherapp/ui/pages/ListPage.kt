@@ -20,43 +20,26 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.weatherapp.db.fb.FBCity
+import com.example.weatherapp.db.fb.FBDatabase
+import com.example.weatherapp.db.fb.FBUser
 import com.example.weatherapp.model.City
 import com.example.weatherapp.model.User
 import com.google.android.gms.maps.model.LatLng
-import kotlin.collections.remove
+import com.example.weatherapp.db.fb.toFBTCity
 
 
 private fun getCities() = List(20 ) { i ->
     City(name = "Cidade $i", weather = "Carregando clima ...")
 }
-
-class MainViewModel : ViewModel() {
-    private val _cities = getCities().toMutableStateList()
-
-    private val _user = mutableStateOf<User?> (null)
-
-    val user : User?
-        get() = _user.value
-
-    val cities
-        get() = _cities.toList()
-    fun remove(city: City) {
-        _cities.remove(city)
-    }
-    fun add(name: String, location: LatLng? = null) {
-        _cities.add(City(name = name, location = location))
-    }
-}
-
-
 
 @Composable
 fun CityItem(
@@ -85,6 +68,63 @@ fun CityItem(
             IconButton(onClick = onClose) {
                 Icon(Icons.Filled.Close, contentDescription = "Close")
             }
+    }
+}
+
+class MainViewModel (private val db: FBDatabase) : ViewModel(), FBDatabase.Listener {
+    private val _cities = mutableStateListOf<City>()
+    val cities
+        get() = _cities.toList()
+    private val _user = mutableStateOf<User?>(null)
+    val user: User?
+        get() = _user.value
+
+    init {
+        db.setListener(this)
+    }
+
+    fun remove(city: City) {
+        db.remove(city.toFBTCity())
+    }
+
+    fun add(name: String, location: LatLng? = null) {
+        db.add(City(name = name, location = location).toFBTCity())
+    }
+
+    override fun onUserLoaded(user: FBUser) {
+        _user.value = user.toUser()
+    }
+
+    override fun onUserSignOut() {
+        //ODO("Not yet implemented")
+    }
+
+    override fun onCityAdded(city: FBCity) {
+        _cities.add(city.toCity())
+    }
+
+    override fun onCityUpdated(city: FBCity) {
+        val updatedCity = city.toCity()
+        val index = _cities.indexOfFirst { it.name == updatedCity.name }
+        if (index != -1) {
+            _cities[index] = updatedCity
+        } else {
+            _cities.add(updatedCity)
+        }
+    }
+
+    override fun onCityRemoved(city: FBCity) {
+        _cities.remove(city.toCity())
+    }
+}
+
+class MainViewModelFactory(private val db : FBDatabase) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            return MainViewModel(db) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
@@ -119,3 +159,5 @@ fun ListPage(
         }
     }
 }
+
+
