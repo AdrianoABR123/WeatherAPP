@@ -5,7 +5,7 @@ import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.core.view.MenuProvider
 import com.example.weatherapp.ui.components.inputs.DataInput
 import com.example.weatherapp.ui.components.inputs.PasswordInput
 import com.google.firebase.Firebase
@@ -46,6 +47,14 @@ class LoginActivity : ComponentActivity() {
             LoginPage()
         }
     }
+
+    override fun addMenuProvider(
+        p0: MenuProvider,
+        p1: androidx.lifecycle.LifecycleOwner,
+        p2: androidx.lifecycle.Lifecycle.State
+    ) {
+        TODO("Not yet implemented")
+    }
 }
 
 @Preview(showBackground = true)
@@ -53,7 +62,7 @@ class LoginActivity : ComponentActivity() {
 fun LoginPage (modifier: Modifier = Modifier){
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
-    val activity = LocalActivity.current
+    val context = LocalContext.current
 
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
@@ -89,9 +98,9 @@ fun LoginPage (modifier: Modifier = Modifier){
                     Firebase.auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(activity, "Login OK!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Login OK!", Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(activity, "Login FALHOU!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, "Login FALHOU!", Toast.LENGTH_LONG).show()
                         }
                     }
                 },
@@ -101,12 +110,12 @@ fun LoginPage (modifier: Modifier = Modifier){
             }
             Button(onClick =
                 {
-                    val intent = Intent(activity, RegisterActivity::class.java).apply {
+                    val intent = Intent(context, RegisterActivity::class.java).apply {
 
                         flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                     }
 
-                    activity?.startActivity(intent)
+                    context.startActivity(intent)
                 },
 
             ) {

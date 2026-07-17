@@ -2,7 +2,7 @@ package com.example.weatherapp.ui.pages
 
 import android.app.Activity
 import android.widget.Toast
-import androidx.activity.compose.LocalActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.weatherapp.api.WeatherService
 import com.example.weatherapp.db.fb.FBCity
 import com.example.weatherapp.db.fb.FBDatabase
 import com.example.weatherapp.db.fb.FBUser
@@ -71,7 +72,7 @@ fun CityItem(
     }
 }
 
-class MainViewModel (private val db: FBDatabase) : ViewModel(), FBDatabase.Listener {
+class MainViewModel (private val db: FBDatabase, private val service : WeatherService) : ViewModel(), FBDatabase.Listener {
     private val _cities = mutableStateListOf<City>()
     val cities
         get() = _cities.toList()
@@ -82,6 +83,22 @@ class MainViewModel (private val db: FBDatabase) : ViewModel(), FBDatabase.Liste
     init {
         db.setListener(this)
     }
+
+    fun addCity(name: String) {
+        service.getLocation(name) { lat, lng ->
+            if (lat != null && lng != null) {
+                db.add(City(name=name, location=LatLng(lat, lng)).toFBTCity())
+            }
+        }
+    }
+    fun addCity(location: LatLng) {
+        service.getName(location.latitude, location.longitude) { name ->
+            if (name != null) {
+                db.add(City(name = name, location = location).toFBTCity())
+            }
+        }
+    }
+
 
     fun remove(city: City) {
         db.remove(city.toFBTCity())
@@ -118,11 +135,11 @@ class MainViewModel (private val db: FBDatabase) : ViewModel(), FBDatabase.Liste
     }
 }
 
-class MainViewModelFactory(private val db : FBDatabase) :
+class MainViewModelFactory(private val db : FBDatabase, private val service : WeatherService) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(db) as T
+            return MainViewModel(db, service) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
@@ -134,7 +151,7 @@ fun ListPage(
     viewModel: MainViewModel
 ) {
     val cityList = viewModel.cities
-    val activity = LocalActivity.current as Activity // Para os Toasts
+    val context = LocalContext.current
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -143,7 +160,7 @@ fun ListPage(
         items(cityList, key = { it.name }) { city ->
             CityItem(city = city, onClose = {
                 Toast.makeText(
-                    activity,
+                    context,
                     "Cidade Excluida!",
                     Toast.LENGTH_LONG
                 ).show()
@@ -151,7 +168,7 @@ fun ListPage(
                 viewModel.remove(city)
             }, onClick = {
                 Toast.makeText(
-                    activity,
+                    context,
                     "Cidade Clicada!",
                     Toast.LENGTH_LONG
                 ).show()
