@@ -1,5 +1,6 @@
 package com.example.weatherapp.model
 
+import com.example.weatherapp.db.fb.FBCity
 import com.google.android.gms.maps.model.LatLng
 
 data class City(
@@ -7,3 +8,4 @@ data class City(
     val weather: String? = null,
     val location: LatLng? = null
 )
+
