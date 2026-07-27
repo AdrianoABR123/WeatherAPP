@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import com.example.weatherapp.ui.components.nav.BottomNavBar
 import com.example.weatherapp.ui.components.nav.BottomNavItem
 import com.example.weatherapp.ui.components.nav.MainNavHost
 import androidx.navigation.NavDestination.Companion.hasRoute
+import com.example.weatherapp.api.WeatherService
 import com.example.weatherapp.db.fb.FBDatabase
 import com.example.weatherapp.ui.components.nav.Route
 import com.example.weatherapp.ui.pages.MainViewModel
@@ -47,7 +49,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val fbDB = remember { FBDatabase() }
-            val viewModel: MainViewModel = viewModel(factory = MainViewModelFactory(fbDB))
+            val weatherService = remember { WeatherService() }
+            val viewModel: MainViewModel = viewModel(factory = MainViewModelFactory(fbDB, weatherService))
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
             val currentRoute = navController.currentBackStackEntryAsState()
@@ -105,7 +108,9 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        launcher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        LaunchedEffect(Unit) {
+                            launcher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        }
                         MainNavHost(navController = navController, viewModel = viewModel)
                     }
                 }

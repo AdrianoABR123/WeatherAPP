@@ -34,10 +34,6 @@ fun MapPage(modifier: Modifier = Modifier, viewModel: MainViewModel){
             .background(Color.Gray)
             .wrapContentSize(Alignment.Center),
     ){
-        val recife = remember { MarkerState(LatLng(-8.0631628, -34.8711403)) }
-        val caruaru = remember { MarkerState(LatLng(-8.28383, -35.97605)) }
-        val joaopessoa = remember { MarkerState( LatLng(-7.120064, -34.879905)) }
-
         val camPosState = rememberCameraPositionState ()
 
         val context = LocalContext.current
@@ -48,39 +44,27 @@ fun MapPage(modifier: Modifier = Modifier, viewModel: MainViewModel){
                         PackageManager.PERMISSION_GRANTED
             )
         }
+
         GoogleMap (
             modifier = Modifier.fillMaxSize(),
-            onMapClick = {
-                viewModel.add("Cidade@${it.latitude}:${it.longitude}", location = it)
-            },
+            onMapClick = { viewModel.addCity(it) },
             cameraPositionState = camPosState,
-            properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = true)
-            ) {
+            properties = MapProperties(
+                isMyLocationEnabled = hasLocationPermission,
+                minZoomPreference = 2f
+            ),
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = hasLocationPermission,
+                mapToolbarEnabled = true
+            )
+        ) {
             viewModel.cities.forEach {
                 if (it.location != null) {
                     Marker( state = MarkerState(position = it.location),
                         title = it.name, snippet = "${it.location}")
                 }
             }
-            Marker(
-                state = recife,
-                title = "Recife",
-                snippet = "Marcador em Recife",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-            )
-            Marker(
-                state = caruaru,
-                title = "Caruaru",
-                snippet = "Marcador em Caruaru",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-            )
-            Marker(
-                state = joaopessoa,
-                title = "João Pessoa",
-                snippet = "Marcador em João Pessoa",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
-            )
         }
+
     }
 }

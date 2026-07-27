@@ -4,7 +4,7 @@ package com.example.weatherapp
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
+import androidx.compose.ui.platform.LocalContext
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,7 +52,7 @@ fun RegisterPage(modifier: Modifier = Modifier){
     var emailUser by rememberSaveable { mutableStateOf("") }
     var passwordUser by rememberSaveable { mutableStateOf("") }
     var passwordConfirm by rememberSaveable { mutableStateOf("") }
-    val activity = LocalActivity.current
+    val context = LocalContext.current
 
     Column(
         modifier = modifier.fillMaxSize().padding(24.dp),
@@ -100,10 +100,10 @@ fun RegisterPage(modifier: Modifier = Modifier){
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 FBDatabase().register(User(nameUser, emailUser).toFBUser())
-                                Toast.makeText(activity,
+                                Toast.makeText(context,
                                     "Registro OK!", Toast.LENGTH_LONG).show()
                             } else {
-                                Toast.makeText(activity,
+                                Toast.makeText(context,
                                     "Registro FALHOU!", Toast.LENGTH_LONG).show()
                             }
                         }
@@ -116,7 +116,7 @@ fun RegisterPage(modifier: Modifier = Modifier){
 
             Button(onClick =
                 {
-                    activity?.finish()
+                    (context as? android.app.Activity)?.finish()
                 }
             ) {
                 Text("Cancelar")
