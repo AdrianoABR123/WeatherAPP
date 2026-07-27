@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -24,10 +23,13 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import coil.compose.AsyncImage
+import com.example.weatherapp.R
 import com.example.weatherapp.api.WeatherService
 import com.example.weatherapp.api.toForecast
 import com.example.weatherapp.api.toWeather
@@ -57,11 +59,14 @@ fun CityItem(
         modifier = modifier.fillMaxWidth().padding(8.dp).clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-            Icon(
-                Icons.Rounded.FavoriteBorder,
-                contentDescription = ""
-            )
-            Spacer(modifier = Modifier.size(12.dp))
+        AsyncImage( // Substitui o Icon(...)
+            model = weather.imgUrl,
+            modifier = modifier.size(75.dp),
+            error = painterResource(id = R.drawable.loading),
+            contentDescription = "Imagem"
+        )
+
+        Spacer(modifier = Modifier.size(12.dp))
             Column(modifier = modifier.weight(1f)) {
                 Text(modifier = Modifier,
                     text = city.name,
@@ -151,6 +156,7 @@ class MainViewModel (private val db: FBDatabase, private val service : WeatherSe
         service.getWeather(name) { apiWeather ->
             apiWeather?.let {
                 _weather[name] = apiWeather.toWeather()
+                loadBitmap(name)
             }
         }
     }
@@ -173,6 +179,15 @@ class MainViewModel (private val db: FBDatabase, private val service : WeatherSe
         loadForecast(name)
         emptyList() // return
     }
+
+    private fun loadBitmap(name: String) {
+        _weather[name]?.let { weather ->
+            service.getBitmap(weather.imgUrl) { bitmap ->
+                _weather[name] = weather.copy(bitmap = bitmap)
+            }
+        }
+    }
+
 
 
 }
