@@ -20,7 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherapp.api.WeatherService
+import com.example.weatherapp.api.toForecast
+import com.example.weatherapp.api.toWeather
 import com.example.weatherapp.db.fb.FBCity
 import com.example.weatherapp.db.fb.FBDatabase
 import com.example.weatherapp.db.fb.FBUser
@@ -36,19 +38,21 @@ import com.example.weatherapp.model.City
 import com.example.weatherapp.model.User
 import com.google.android.gms.maps.model.LatLng
 import com.example.weatherapp.db.fb.toFBTCity
+import com.example.weatherapp.model.Forecast
+import com.example.weatherapp.model.Weather
+import com.example.weatherapp.ui.components.nav.Route
+import kotlin.collections.emptyList
 
-
-private fun getCities() = List(20 ) { i ->
-    City(name = "Cidade $i", weather = "Carregando clima ...")
-}
 
 @Composable
 fun CityItem(
     city: City,
+    weather: Weather,
     onClick: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ){
+    val desc = if (weather == Weather.LOADING) "Carregando clima..." else weather.desc
     Row(
         modifier = modifier.fillMaxWidth().padding(8.dp).clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
@@ -63,7 +67,7 @@ fun CityItem(
                     text = city.name,
                     fontSize = 24.sp)
                 Text(modifier = Modifier,
-                    text = city.weather?:"Carregando clima...",
+                    text = desc,
                     fontSize = 16.sp)
             }
             IconButton(onClick = onClose) {
@@ -73,9 +77,23 @@ fun CityItem(
 }
 
 class MainViewModel (private val db: FBDatabase, private val service : WeatherService) : ViewModel(), FBDatabase.Listener {
-    private val _cities = mutableStateListOf<City>()
-    val cities
-        get() = _cities.toList()
+    private val _cities = mutableStateMapOf<String, City>()
+
+    private val _forecast = mutableStateMapOf<String, List<Forecast>?>()
+
+    private var _city = mutableStateOf<String?>(null)
+
+    private var _page = mutableStateOf<Route>(Route.home)
+
+    var page: Route
+        get() = _page.value
+        set(tmp) { _page.value = tmp }
+    var city: String?
+        get() = _city.value
+        set(tmp) { _city.value = tmp }
+    val cities : List<City>
+        get() = _cities.values.toList().sortedBy { it.name }
+    private val _weather = mutableStateMapOf<String, Weather>()
     private val _user = mutableStateOf<User?>(null)
     val user: User?
         get() = _user.value
@@ -117,22 +135,46 @@ class MainViewModel (private val db: FBDatabase, private val service : WeatherSe
     }
 
     override fun onCityAdded(city: FBCity) {
-        _cities.add(city.toCity())
+        _cities[city.name!!] = city.toCity()
     }
 
     override fun onCityUpdated(city: FBCity) {
-        val updatedCity = city.toCity()
-        val index = _cities.indexOfFirst { it.name == updatedCity.name }
-        if (index != -1) {
-            _cities[index] = updatedCity
-        } else {
-            _cities.add(updatedCity)
-        }
+        _cities.remove(city.name)
+        _cities[city.name!!] = city.toCity()
     }
 
     override fun onCityRemoved(city: FBCity) {
-        _cities.remove(city.toCity())
+        _cities.remove(city.name)
     }
+
+    private fun loadWeather(name: String) {
+        service.getWeather(name) { apiWeather ->
+            apiWeather?.let {
+                _weather[name] = apiWeather.toWeather()
+            }
+        }
+    }
+
+    fun weather (name: String) = _weather.getOrPut(name) {
+        loadWeather(name)
+        Weather.LOADING // retorno
+    }
+
+    private fun loadForecast(name: String) {
+        service.getForecast(name) { apiForecast ->
+            apiForecast?.let {
+                _forecast[name] = apiForecast.toForecast()
+            }
+        }
+    }
+
+
+    fun forecast (name: String) = _forecast.getOrPut(name) {
+        loadForecast(name)
+        emptyList() // return
+    }
+
+
 }
 
 class MainViewModelFactory(private val db : FBDatabase, private val service : WeatherService) :
@@ -151,28 +193,34 @@ fun ListPage(
     viewModel: MainViewModel
 ) {
     val cityList = viewModel.cities
-    val context = LocalContext.current
+    val context = LocalContext.current as? Activity
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        items(cityList, key = { it.name }) { city ->
-            CityItem(city = city, onClose = {
-                Toast.makeText(
-                    context,
-                    "Cidade Excluida!",
-                    Toast.LENGTH_LONG
-                ).show()
-                
-                viewModel.remove(city)
-            }, onClick = {
-                Toast.makeText(
-                    context,
-                    "Cidade Clicada!",
-                    Toast.LENGTH_LONG
-                ).show()
-            })
+        items(
+            items = cityList,
+            key = {it.name}
+        ) {
+            city ->
+            CityItem(
+                city = city,
+                weather = viewModel.weather(city.name),
+                onClose = {
+                    Toast.makeText(
+                        context,
+                        "Cidade Excluida!",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    viewModel.remove(city)
+                },
+                onClick = {
+                    viewModel.city = city.name
+                    viewModel.page = Route.home
+                }
+            )
         }
     }
 }
