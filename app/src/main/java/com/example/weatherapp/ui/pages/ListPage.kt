@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.weatherapp.db.fb.toFBTCity
 import com.example.weatherapp.model.Forecast
 import com.example.weatherapp.model.Weather
+import com.example.weatherapp.ui.components.nav.Route
 import kotlin.collections.emptyList
 
 
@@ -81,6 +82,12 @@ class MainViewModel (private val db: FBDatabase, private val service : WeatherSe
     private val _forecast = mutableStateMapOf<String, List<Forecast>?>()
 
     private var _city = mutableStateOf<String?>(null)
+
+    private var _page = mutableStateOf<Route>(Route.home)
+
+    var page: Route
+        get() = _page.value
+        set(tmp) { _page.value = tmp }
     var city: String?
         get() = _city.value
         set(tmp) { _city.value = tmp }
@@ -211,6 +218,7 @@ fun ListPage(
                 },
                 onClick = {
                     viewModel.city = city.name
+                    viewModel.page = Route.home
                 }
             )
         }
