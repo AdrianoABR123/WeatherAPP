@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherapp.api.WeatherService
+import com.example.weatherapp.api.toForecast
 import com.example.weatherapp.api.toWeather
 import com.example.weatherapp.db.fb.FBCity
 import com.example.weatherapp.db.fb.FBDatabase
@@ -38,7 +38,9 @@ import com.example.weatherapp.model.City
 import com.example.weatherapp.model.User
 import com.google.android.gms.maps.model.LatLng
 import com.example.weatherapp.db.fb.toFBTCity
+import com.example.weatherapp.model.Forecast
 import com.example.weatherapp.model.Weather
+import kotlin.collections.emptyList
 
 
 @Composable
@@ -76,6 +78,12 @@ fun CityItem(
 class MainViewModel (private val db: FBDatabase, private val service : WeatherService) : ViewModel(), FBDatabase.Listener {
     private val _cities = mutableStateMapOf<String, City>()
 
+    private val _forecast = mutableStateMapOf<String, List<Forecast>?>()
+
+    private var _city = mutableStateOf<String?>(null)
+    var city: String?
+        get() = _city.value
+        set(tmp) { _city.value = tmp }
     val cities : List<City>
         get() = _cities.values.toList().sortedBy { it.name }
     private val _weather = mutableStateMapOf<String, Weather>()
@@ -145,6 +153,21 @@ class MainViewModel (private val db: FBDatabase, private val service : WeatherSe
         Weather.LOADING // retorno
     }
 
+    private fun loadForecast(name: String) {
+        service.getForecast(name) { apiForecast ->
+            apiForecast?.let {
+                _forecast[name] = apiForecast.toForecast()
+            }
+        }
+    }
+
+
+    fun forecast (name: String) = _forecast.getOrPut(name) {
+        loadForecast(name)
+        emptyList() // return
+    }
+
+
 }
 
 class MainViewModelFactory(private val db : FBDatabase, private val service : WeatherService) :
@@ -187,11 +210,7 @@ fun ListPage(
                     viewModel.remove(city)
                 },
                 onClick = {
-                    Toast.makeText(
-                        context,
-                        "Cidade Clicada!",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    viewModel.city = city.name
                 }
             )
         }
