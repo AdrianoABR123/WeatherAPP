@@ -1,5 +1,5 @@
+import org.gradle.accessors.dm.LibrariesForLibs
 import java.util.Properties
-
 
 plugins {
     alias(libs.plugins.android.application)
@@ -54,6 +54,8 @@ android {
 dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.9.8")
+    val workVersion = "2.11.2"
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")

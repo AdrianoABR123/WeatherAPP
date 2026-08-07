@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,10 @@ import com.example.weatherapp.model.Forecast
 
 @Composable
 fun HomePage(modifier: Modifier = Modifier,viewModel: MainViewModel) {
+    val city = viewModel.cities.find { it.name == viewModel.city }
+    val icon = if (city?.isMonitored == true) Icons.Filled.Notifications else Icons.Outlined.Notifications
+
+
     Column {
         if (viewModel.city == null) {
             Column( modifier = modifier.fillMaxSize()
@@ -54,8 +60,16 @@ fun HomePage(modifier: Modifier = Modifier,viewModel: MainViewModel) {
                 )
                 Column {
                     Spacer(modifier = modifier.size(12.dp))
-                    Text( text = viewModel.city ?: "Selecione uma cidade...",
-                        fontSize = 28.sp )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text( text = viewModel.city ?: "Selecione uma cidade...",
+                            fontSize = 28.sp )
+                        Icon( imageVector = icon, contentDescription = "Monitorada?",
+                            modifier = Modifier.size(32.dp).clickable {
+                                viewModel.update(city = city!!.copy(isMonitored = !city.isMonitored))
+                            }
+                        )
+                    }
                     viewModel.city?.let { name ->
                         val weather = viewModel.weather(name)
                         Spacer(modifier = modifier.size(12.dp))
