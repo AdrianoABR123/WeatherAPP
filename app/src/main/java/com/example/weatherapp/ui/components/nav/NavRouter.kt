@@ -14,6 +14,9 @@ sealed interface Route{
     data object List: Route
     @Serializable
     data object Map: Route
+    companion object {
+        val Home: Any
+    }
 }
 
 sealed class BottomNavItem(
